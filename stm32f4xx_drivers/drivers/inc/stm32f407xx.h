@@ -9,6 +9,7 @@
 #define INC_STM32F407XX_H_
 
 #include <stdint.h>
+#include <stddef.h>
 
 /************************************ START: PROCESSOR SPECIFIC DETAILS ********************************/
 /*
@@ -204,10 +205,38 @@ typedef struct
 	volatile uint32_t I2SPR;           // 0x20 I2S prescaler register
 }SPI_RegDef_t;
 
+/************************************** I2C peripheral ******************************/
+typedef struct
+{
+	volatile uint32_t CR1;             // 0x00 I2C control register-1
+	volatile uint32_t CR2;             // 0x04 I2C control register-2
+	volatile uint32_t OAR1;            // 0x08 I2C OAR2 register
+	volatile uint32_t OAR2;            // 0x0C I2C OAR2 register
+	volatile uint32_t DR;              // 0x10 I2C data register
+	volatile uint32_t SR1;             // 0x14 I2C status register-1
+	volatile uint32_t SR2;             // 0x18 I2C status register-2
+	volatile uint32_t CCR;             // 0x1C I2C clock configuration register
+	volatile uint32_t TRISE;           // 0x20 I2C TRISE register
+	volatile uint32_t FLTR;            // 0x20 I2C FLTR register
+}I2C_RegDef_t;
+
+
+/************************************** USART peripheral ******************************/
+typedef struct
+{
+	volatile uint32_t SR;                // 0x00 USART status register
+	volatile uint32_t DR;                // 0x04 USART data register
+	volatile uint32_t BRR;               // 0x08 USART baud rate register
+	volatile uint32_t CR1;               // 0x0C USART control register-1
+	volatile uint32_t CR2;               // 0x10 USART control register-2
+	volatile uint32_t CR3;               // 0x14 USART control register-3
+	volatile uint32_t GTPR;              // 0x18 USART guard time & prescaler register
+}USART_RegDef_t;
 
 /***************************************************************************************************************
  * *********** peripheral definition Macros == peripheral base address type casted (xxx_RegDef_t *) ************
  * ************************************************************************************************************/
+// @GPIOx
 #define GPIOA                           ( (GPIO_RegDef_t*) GPIOA_BASEADDR )
 #define GPIOB                           ( (GPIO_RegDef_t*) GPIOB_BASEADDR )
 #define GPIOC                           ( (GPIO_RegDef_t*) GPIOC_BASEADDR )
@@ -227,10 +256,27 @@ typedef struct
 
 #define SYSCFG                          ( (SYSCFG_RegDef_t*) SYSCFG_BASEADDR )
 
+// @SPIx
 #define SPI1                            ( (SPI_RegDef_t*) SPI1_BASEADDR )
 #define SPI2                            ( (SPI_RegDef_t*) SPI2_BASEADDR )
 #define SPI3                            ( (SPI_RegDef_t*) SPI3_BASEADDR )
 #define SPI4                            ( (SPI_RegDef_t*) SPI4_BASEADDR )
+
+
+// @I2Cx
+#define I2C1                            ( (I2C_RegDef_t*) I2C1_BASEADDR )
+#define I2C2                            ( (I2C_RegDef_t*) I2C2_BASEADDR )
+#define I2C3                            ( (I2C_RegDef_t*) I2C3_BASEADDR )
+
+
+// @USARTx
+#define USART1                          ( (USART_RegDef_t*) USART1_BASEADDR )
+#define USART2                          ( (USART_RegDef_t*) USART2_BASEADDR )
+#define USART3                          ( (USART_RegDef_t*) USART3_BASEADDR )
+#define UART4                           ( (USART_RegDef_t*) UART4_BASEADDR )
+#define UART5                           ( (USART_RegDef_t*) UART5_BASEADDR )
+#define USART6                          ( (USART_RegDef_t*) USART6_BASEADDR )
+
 
 
 /**************************** Clock ENABLE MACROS ************************************/
@@ -263,6 +309,9 @@ typedef struct
 #define USART1_PCLK_EN()               ( RCC->APB2ENR |= (1<<4) )
 #define USART2_PCLK_EN()               ( RCC->APB1ENR |= (1<<17) )
 #define USART3_PCLK_EN()               ( RCC->APB1ENR |= (1<<18) )
+#define UART4_PCLK_EN()                ( RCC->APB1ENR |= (1<<19) )
+#define UART5_PCLK_EN()                ( RCC->APB1ENR |= (1<<20) )
+#define USART6_PCLK_EN()               ( RCC->APB1ENR |= (1<<5) )
 
 
 /* Clock Enable Macros for SYSCFG Peripherals*/
@@ -302,6 +351,7 @@ typedef struct
 #define USART1_PCLK_DI()               ( RCC->APB2ENR &= ~(1<<4) )
 #define USART2_PCLK_DI()               ( RCC->APB1ENR &= ~(1<<17) )
 #define USART3_PCLK_DI()               ( RCC->APB1ENR &= ~(1<<18) )
+#define UART4_PCLK_DI()                ( RCC->APB1ENR &= ~(1<<19) )
 
 
 
@@ -320,12 +370,29 @@ typedef struct
 
 
 
-/* Peripheral RESET Macros for SPIx Peripherals*/
+/* Peripheral RESET Macros for SPIx Peripherals */
 #define SPI1_REG_RESET()              do { ( RCC->APB2RSTR |= (1<<12) ); ( RCC->APB2RSTR &= ~(1<<12) ); } while(0)
 #define SPI2_REG_RESET()              do { ( RCC->APB1RSTR |= (1<<14) ); ( RCC->APB1RSTR &= ~(1<<14) ); } while(0)
 #define SPI3_REG_RESET()              do { ( RCC->APB1RSTR |= (1<<15) ); ( RCC->APB1RSTR &= ~(1<<15) ); } while(0)
 #define SPI4_REG_RESET()              do { ( RCC->APB2RSTR |= (1<<13) ); ( RCC->APB2RSTR &= ~(1<<13) ); } while(0)
 
+
+
+
+/* Peripheral RESET Macros for I2Cx Peripherals */
+#define I2C1_REG_RESET()              do { ( RCC->APB1RSTR |= (1<<21) ); ( RCC->APB1RSTR &= ~(1<<21) ); } while(0)
+#define I2C2_REG_RESET()              do { ( RCC->APB1RSTR |= (1<<22) ); ( RCC->APB1RSTR &= ~(1<<22) ); } while(0)
+#define I2C3_REG_RESET()              do { ( RCC->APB1RSTR |= (1<<23) ); ( RCC->APB1RSTR &= ~(1<<23) ); } while(0)
+
+
+
+/* Peripheral RESET Macros for USARTx Peripherals */
+#define USART1_REG_RESET()            do { ( RCC->APB2RSTR |= (1<<4) ); ( RCC->APB2RSTR &= ~(1<<4) ); } while(0)
+#define USART2_REG_RESET()            do { ( RCC->APB1RSTR |= (1<<17) ); ( RCC->APB1RSTR &= ~(1<<17) ); } while(0)
+#define USART3_REG_RESET()            do { ( RCC->APB1RSTR |= (1<<18) ); ( RCC->APB1RSTR &= ~(1<<18) ); } while(0)
+#define UART4_REG_RESET()             do { ( RCC->APB1RSTR |= (1<<19) ); ( RCC->APB1RSTR &= ~(1<<19) ); } while(0)
+#define UART5_REG_RESET()             do { ( RCC->APB1RSTR |= (1<<20) ); ( RCC->APB1RSTR &= ~(1<<20) ); } while(0)
+#define USART6_REG_RESET()            do { ( RCC->APB2RSTR |= (1<<5) ); ( RCC->APB2RSTR &= ~(1<<5) ); } while(0)
 
 
 /* This macro returns a code (0 to 7) for a given GPIO base address*/
@@ -351,6 +418,26 @@ typedef struct
 #define IRQ_NO_EXTI15_10                 40
 
 
+#define IRQ_NO_SPI1                      35
+#define IRQ_NO_SPI2                      36
+#define IRQ_NO_SPI3                      51
+
+
+#define IRQ_NO_I2C1_EV                   31  // I2C1 event interrupt
+#define IRQ_NO_I2C1_ER                   32  // I2C1 error interrupt
+
+#define IRQ_NO_I2C2_EV                   33  // I2C2 event interrupt
+#define IRQ_NO_I2C2_ER                   34  // I2C2 error interrupt
+
+#define IRQ_NO_I2C3_EV                   72  // I2C3 event interrupt
+#define IRQ_NO_I2C3_ER                   73  // I2C3 error interrupt
+
+#define IRQ_NO_USART1                    37  // USART1 global interrupt
+#define IRQ_NO_USART2                    38  // USART2 global interrupt
+#define IRQ_NO_USART3                    39  // USART3 global interrupt
+#define IRQ_NO_UART4                     52  // USART4 global interrupt
+#define IRQ_NO_UART5                     53  // USART5 global interrupt
+#define IRQ_NO_USART6                    71  // USART6 global interrupt
 
 
 /*
@@ -360,7 +447,12 @@ typedef struct
 #define NVIC_IRQ_PRI1                    1
 #define NVIC_IRQ_PRI2                    2
 #define NVIC_IRQ_PRI15                   15
+#define NVIC_IRQ_PRI42                   42
+#define NVIC_IRQ_PRI58                   58
 
+#define NVIC_IRQ_PRI44                   44  // USART1 interrupt priority
+#define NVIC_IRQ_PRI45                   45  // USART2 interrupt priority
+#define NVIC_IRQ_PRI46                   46  // USART2 interrupt priority
 
 
 
@@ -419,8 +511,165 @@ typedef struct
 #define SPI_SR_FRE             8  // Frame format error flag
 
 
+
+
+/********************************************************
+ * Bit definition macros for I2C peripheral
+********************************************************/
+
+// CR1 register bits
+#define I2C_CR1_PE             0  // Peripheral Enable
+#define I2C_CR1_SMBUS          1  // SMBus mode
+#define I2C_CR1_SMBTYPE        3  // SMBus type
+#define I2C_CR1_ENARP          4  // ARP Enable
+#define I2C_CR1_ENPEC          5  // PEC Enable
+#define I2C_CR1_ENGC           6  // General Call Enable
+#define I2C_CR1_NOSTRETCH      7  // Clock Stretch Disable (Slave Mode)
+#define I2C_CR1_START          8  // Start Generation
+#define I2C_CR1_STOP           9  // Stop Generation
+#define I2C_CR1_ACK            10 // Acknowledge Enable
+#define I2C_CR1_POS            11 // Acknowledge/PEC Position (for data reception)
+#define I2C_CR1_PEC            12 // Packet error checking
+#define I2C_CR1_ALERT          13 // SMBus alert
+#define I2C_CR1_SWRST          15 // Software reset
+
+
+// CR2 register bits
+#define I2C_CR2_FREQ           0  // Peripheral clock frequency
+#define I2C_CR2_ITERREN        8  // Error interrupt enable
+#define I2C_CR2_ITEVTEN        9  // Event interrupt enable
+#define I2C_CR2_ITBUFEN        10 // Buffer interrupt Enable
+#define I2C_CR2_DMAEN          11 // DMA request enable
+#define I2C_CR2_LAST           12 // DMA last transfer
+
+
+// OAR1 Own address register bits
+#define I2C_OAR1_ADD0          0  // Peripheral clock frequency
+#define I2C_OAR1_ADD71         1  // Interface address
+#define I2C_OAR1_ADD98         8  // Interface address
+#define I2C_OAR1_ADDMODE      15 // Addressing mode (Slave mode)
+
+
+// OAR2 Own address register bits
+#define I2C_OAR2_ENDUAL        0  // Dual addressing mode
+#define I2C_OAR2_ADD2          1  // Interface address of dual addressing
+
+
+// Status register SR1
+#define I2C_SR1_SB              0  // Start bit
+#define I2C_SR1_ADDR            1  // Address sent (master mode) / matched (salve mode)
+#define I2C_SR1_BTF             2  // Byte transfer finished
+#define I2C_SR1_ADD10           3  // 10-bit header sent (master mode)
+#define I2C_SR1_STOPF           4  // Stop detection (salve mode)
+#define I2C_SR1_RXNE            6  // Data register empty Reception done
+#define I2C_SR1_TXE             7  // Data register empty Transmission done
+#define I2C_SR1_BERR            8  // Bus error
+#define I2C_SR1_ARLO            9  // Arbitration lost (master mode)
+#define I2C_SR1_AF              10 // Acknowledge failure
+#define I2C_SR1_OVR             11 // Overrun / Underrun
+#define I2C_SR1_PECERR          12 // PEC error in reception
+#define I2C_SR1_TIMEOUT         14 // Timeout/Tlow error
+#define I2C_SR1_SMBALERT        15 // SMBus alert
+
+
+// Status register SR2
+#define I2C_SR2_MSL             0  // Master/Slave mode
+#define I2C_SR2_BUSY            1  // Bus busy
+#define I2C_SR2_TRA             2  // Transmitter/receiver
+#define I2C_SR2_GENCALL         4  // General call address (slave mode)
+#define I2C_SR2_SMBDEFAULT      5  // SMBus device default address (slave mode)
+#define I2C_SR2_SMBHOST         6  // SMBus host address (Slave mode)
+#define I2C_SR2_DUALF           7  // Dual flag (slave mode)
+
+
+
+// Clock control register CCR
+#define I2C_CCR_CCR             0  // Clock control register in Fm/Sm mode (master mode)
+#define I2C_CCR_DUTY            14 // Fm mode duty cycle
+#define I2C_CCR_FS              15 // Master mode selection
+
+/*******************************************************
+ * Bit definition macros for USART peripheral
+********************************************************/
+// Status Register SR
+#define USART_SR_PE              0 // Parity error
+#define USART_SR_FE              1 // Framing error
+#define USART_SR_NF              2 // Noise detected Flag
+#define USART_SR_ORE             3 // Overrun error
+#define USART_SR_IDLE            4 // Idle line detected
+#define USART_SR_RXNE            5 // Read data register not empty
+#define USART_SR_TC              6 // Transmission complete
+#define USART_SR_TXE             7 // Transmit data register empty
+#define USART_SR_LBD             8 // LIN break detection flag
+#define USART_SR_CTS             9 // CTS flag
+
+// Status Register CR1
+#define USART_CR1_SBK              0  // Send break
+#define USART_CR1_RWU              1  // Receiver wakeup
+#define USART_CR1_RE               2  // Receiver enable
+#define USART_CR1_TE               3  // Transmitter enable
+#define USART_CR1_IDLEIE           4  // Idle interrupt enable
+#define USART_CR1_RXNEIE           5  // RXNE interrupt enable
+#define USART_CR1_TCIE             6  // Transmission complete interrupt enable
+#define USART_CR1_TXEIE            7  // TXE interrupt enable
+#define USART_CR1_PEIE             8  // PE interrupt enable
+#define USART_CR1_PS               9  // Parity selection
+#define USART_CR1_PCE              10 // Parity control enable
+#define USART_CR1_WAKE             11 // Wakeup method
+#define USART_CR1_M                12 // Word length
+#define USART_CR1_UE               13 // USART enable
+#define USART_CR1_OVER8            15 // Oversampling mode
+
+
+// Status Register CR2
+#define USART_CR2_ADD              0  // Address of USART node
+#define USART_CR2_LBDL             5  // LIN break detection length
+#define USART_CR2_LBDIE            6  // LIN break detection interrupt enable
+#define USART_CR2_LBCL             8  // Last bit clock bit
+#define USART_CR2_CPHA             9  // Clock phase
+#define USART_CR2_CPOL             10 // Clock polarity
+#define USART_CR2_CLKEN            11  // Clock enable
+#define USART_CR2_STOP             12  // STOP bits
+#define USART_CR2_LINEN            14  // LIN mode enable
+
+
+
+// Status Register CR3
+// Status Register CR2
+#define USART_CR3_EIE              0  // Error interrupt enable
+#define USART_CR3_IREN             1  // IrDA mode enable
+#define USART_CR3_IRLP             2  // IrDA low-power
+#define USART_CR3_HDSEL            3  // Half-duplex selection
+#define USART_CR3_NACK             4  // smart card NACK enable
+#define USART_CR3_SCEN             5  // smart card mode enable
+#define USART_CR3_DMAR             6  // DMA enable receiver
+#define USART_CR3_DMAT             7  // DMA enable transmitter
+#define USART_CR3_RTSE             8  // RTS enable
+#define USART_CR3_CTSE             9  // CTS enable
+#define USART_CR3_CTSIE            10  // CTS interrupt enable
+#define USART_CR3_ONEBIT           11  // One sample bit method enable
+
+
+
+
+
+/********************************************************
+ * Bit definition macros for RCC peripheral
+********************************************************/
+// Clock configuration register CFGR
+#define RCC_CFGR_SW             0  // System clock switch (By SW)
+#define RCC_CFGR_SWS            2  // System clock switch status (By HW) @RCC_CFGR_SWS "RCC.h"
+#define RCC_CFGR_HPRE           4  // AHB prescaler @RCC_CFGR_HPRE "RCC.h"
+#define RCC_CFGR_PPRE1          10 // APB1 low speed prescaler @RCC_CFGR_PPRE "RCC.h"
+#define RCC_CFGR_PPRE2          13 // APB1 high speed prescaler
+
+
+
 /* will be included directly with the stm32f407 */
 #include "stm32f407xx_GPIO.h"
 #include "stm32f407xx_SPI.h"
+#include "stm32f407xx_I2C.h"
+#include "stm32f407xx_RCC.h"
+#include "stm32f407xx_USART.h"
 
 #endif /* INC_STM32F407XX_H_ */
