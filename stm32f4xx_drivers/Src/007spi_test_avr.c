@@ -86,7 +86,7 @@ void GPIO_ButtonInits(void)
 
 void delay(void)
 {
-	for(uint32_t i = 0; i < (500000/4); i++);
+	for(uint32_t i = 0; i < (500000/2); i++);
 }
 
 
@@ -95,7 +95,7 @@ void delay(void)
 int main(void)
 {
 
-	char user_data []= "Juventus";
+	uint8_t user_data = 1;
 
 	// Initialize the GPIO pins as SPI
 	SPI2_GPIOInits();
@@ -136,7 +136,7 @@ int main(void)
 			//SPI_SendData(SPI2, &dataLength, 1);
 
 			// sending data
-			SPI_SendData(SPI2, (uint8_t*)user_data, strlen(user_data));
+			SPI_SendData(SPI2, &user_data, sizeof(user_data));
 
 
 			// As long as SPI busy dont shut down

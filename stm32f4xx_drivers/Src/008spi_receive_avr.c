@@ -37,8 +37,8 @@ void SPI2_GPIOInits(void)
 	GPIO_Init(&spi_pin);
 
 	// SPI2_MISO
-	//spi_pin.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_14;
-	//GPIO_Init(&spi_pin);
+	spi_pin.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_14;
+	GPIO_Init(&spi_pin);
 
 	// SPI2_MOSI
 	spi_pin.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_15;
@@ -70,7 +70,7 @@ void SPI2_Inits(void)
 void GPIO_ButtonInits(void)
 {
 
-	GPIO_Handle_t gpio_button;
+	GPIO_Handle_t gpio_button, gpio_led;
 
 	gpio_button.pGPIOx = GPIOA;
 	// Pin configuration through your object from structure (Button PIN)
@@ -81,21 +81,32 @@ void GPIO_ButtonInits(void)
 
 
 	GPIO_Init(&gpio_button);
+
+
+
+	// 3. Pin configuration through your object from structure (LED PIN)
+	gpio_led.pGPIOx = GPIOD;
+
+	gpio_led.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_12;        //LED on PD12
+	gpio_led.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;        //LED is output mode
+	gpio_led.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;    // output type is push pull better than open drain
+    gpio_led.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;  // as already push pull output type
+	gpio_led.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;     // does not really matter
+
+	GPIO_Init(&gpio_led);
 }
 
-
+// small delay function
 void delay(void)
 {
-	for(uint32_t i = 0; i < (500000/4); i++);
+	for(uint32_t i = 0; i < (500000/2); i++);
 }
-
-
 
 
 int main(void)
 {
-
-	char user_data []= "Juventus";
+	uint8_t dummy_write= 0xff;
+	uint8_t dummy_read;
 
 	// Initialize the GPIO pins as SPI
 	SPI2_GPIOInits();
@@ -121,23 +132,37 @@ int main(void)
 			//only when button is pressed
 			while( !( GPIO_ReadFromInputPin(GPIOA, GPIO_PIN_0) ) );
 
-
 			// small delay
 			delay();
 
 			//2. Enable the SPI peripheral
 			SPI_PeripheralControl(SPI2, ENABLE);
 
+			// First command
+			uint8_t command= 0x0f;
+			uint8_t ackByte;
 
-			// the length of data
-
-		    //uint8_t dataLength = strlen(user_data);
-
-			//SPI_SendData(SPI2, &dataLength, 1);
-
+			/****** Sending the command******/
 			// sending data
-			SPI_SendData(SPI2, (uint8_t*)user_data, strlen(user_data));
+			SPI_SendData(SPI2, &command, 1);
 
+			// when SPI send it receive a garbage data round communication
+			SPI_ReceiveData(SPI2, &dummy_read, 1);
+
+
+			/****** Receiving the Acknowledgement******/
+			//sending dummy data in order to receive the important data
+			SPI_SendData(SPI2, &dummy_write, 1);
+
+			//receiving the important data
+			SPI_ReceiveData(SPI2, &ackByte, 1);
+
+			// verifying we received the correct data
+			if ( SPI_VerifyResponse(ackByte) )
+			{
+				// LED ON
+				GPIO_WriteToOutputPin(GPIOD, GPIO_PIN_12, SET);
+			}
 
 			// As long as SPI busy dont shut down
 			while ( SPI_GetSPIstatus(SPI2, SPI_BUSY_FLAG) );
